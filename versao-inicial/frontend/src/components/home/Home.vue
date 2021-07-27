@@ -25,7 +25,8 @@ export default {
     },
     methods: {
         getStats() {
-            axios.get(`${baseApiUrl}/stats`).then(res => this.stat = res.data)
+            const url = `${baseApiUrl}/stats`
+            axios.get(url).then(res => this.stat = res.data)
         }
     },
     mounted() {
