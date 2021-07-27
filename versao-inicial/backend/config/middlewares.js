@@ -4,7 +4,6 @@
 //Cors - permite que possamos acessar de outra api o backend
 
 const bodyParser = require('body-parser')
-const BodyParse = require('body-parser')
 const cors = require('cors')
 
 /** 

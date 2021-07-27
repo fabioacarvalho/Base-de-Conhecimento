@@ -1,12 +1,17 @@
 module.exports = app => {
-    const { existOrError, notExistsOrError } = app.api.validation
+    const { existsOrError, notExistsOrError } = app.api.validation
 
     const save = (req, res) => {
-        const category = { ...req.body }
+        const category = {
+            id: req.body.id,
+            name: req.body.name,
+            parentId: req.body.parentId
+        }
+        
         if(req.params.id) category.id = req.params.id
 
         try {
-            existOrError(category.name, 'Nome não informado')
+            existsOrError(category.name, 'Nome não informado')
         } catch(msg) {
             return res.status(400).send(msg)
         }
@@ -21,8 +26,7 @@ module.exports = app => {
             app.db('categories')
                 .insert(category)
                 .then(_ => res.status(204).send())
-                .catch(err => res.status(500).send())
-            
+                .catch(err => res.status(500).send(err))
         }
     }
 
@@ -101,10 +105,9 @@ module.exports = app => {
 
     const getTree = (req, res) => {
         app.db('categories')
-            .then(categories => res.json(toTree(withPath(categories))))
+            .then(categories => res.json(toTree(categories)))
             .catch(err => res.status(500).send(err))
     }
-
 
     return { save, remove, get, getById, getTree }
 }

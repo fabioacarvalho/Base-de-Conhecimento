@@ -1,18 +1,18 @@
 const queries = require('./queries')
 
 module.exports = app => {
-    const { existOrError } = app.api.validation
+    const { existsOrError } = app.api.validation
 
     const save = (req, res) => {
         const article = { ...req.body }
         if(req.params.id) article.id = req.params.id
 
         try {
-            existOrError(article.name, 'Nome não informado!')
-            existOrError(article.description, 'Descrição não informada')
-            existOrError(article.categoryId, 'Categoria não informada')
-            existOrError(article.userId, 'Autor não informado')
-            existOrError(article.content, 'Conteudo não informado')
+            existsOrError(article.name, 'Nome não informado')
+            existsOrError(article.description, 'Descrição não informada')
+            existsOrError(article.categoryId, 'Categoria não informada')
+            existsOrError(article.userId, 'Autor não informado')
+            existsOrError(article.content, 'Conteúdo não informado')
         } catch(msg) {
             res.status(400).send(msg)
         }
@@ -26,31 +26,29 @@ module.exports = app => {
         } else {
             app.db('articles')
                 .insert(article)
-                .then(_ => res.status(204))
+                .then(_ => res.status(204).send())
                 .catch(err => res.status(500).send(err))
         }
-
     }
 
     const remove = async (req, res) => {
         try {
-            const rowaDeleted = await app.db('articles')
-                .where({ id: req.params.id }).dell()
-            existsOrErros(rowsDeleted, 'Artigo não foi encontrado')
-
+            const rowsDeleted = await app.db('articles')
+                .where({ id: req.params.id }).del()
+            
             try {
-                existOrError(rowsDeleted, 'Artigo não foi encontrado.')
+                existsOrError(rowsDeleted, 'Artigo não foi encontrado.')
             } catch(msg) {
-                return res.status(400).send(msg)
+                return res.status(400).send(msg)    
             }
 
             res.status(204).send()
         } catch(msg) {
-            res.status(400).send(msg)
+            res.status(500).send(msg)
         }
     }
 
-    const limit = 10 // Usar para paginação
+    const limit = 10 // usado para paginação
     const get = async (req, res) => {
         const page = req.query.page || 1
 
@@ -68,7 +66,8 @@ module.exports = app => {
         app.db('articles')
             .where({ id: req.params.id })
             .first()
-            .then(article => {article.content.toString()
+            .then(article => {
+                article.content = article.content.toString()
                 return res.json(article)
             })
             .catch(err => res.status(500).send(err))
@@ -77,7 +76,8 @@ module.exports = app => {
     const getByCategory = async (req, res) => {
         const categoryId = req.params.id
         const page = req.query.page || 1
-        const categories = await app.db.raw(queries.categoryWithChildren, req.params.id)
+        const categories = await app.db.raw(queries.categoryWithChildren, categoryId)
+        const ids = categories.rows.map(c => c.id)
 
         app.db({a: 'articles', u: 'users'})
             .select('a.id', 'a.name', 'a.description', 'a.imageUrl', { author: 'u.name' })
@@ -90,6 +90,4 @@ module.exports = app => {
     }
 
     return { save, remove, get, getById, getByCategory }
-
 }
-
