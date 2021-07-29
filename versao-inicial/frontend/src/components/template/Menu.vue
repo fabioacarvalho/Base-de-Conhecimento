@@ -40,6 +40,10 @@ export default {
                 params: { id: node.id }
                 //Ainda não acontece nada pq preciso vincular no mounted.
             })
+
+            if(this.$mq === 'xs' || this.$mq === 'sm')  {
+                this.$store.commit('toggleMenu', false)
+            }
         }
     },
     mounted() {

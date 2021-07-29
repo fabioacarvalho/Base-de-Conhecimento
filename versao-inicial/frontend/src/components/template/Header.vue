@@ -3,8 +3,13 @@
         <a class="toggle" @click="toggleMenu" v-if="!hideToggle">
             <i class="fa fa-lg" :class="icon"></i>
         </a>
-        <h1 class="title">
-            <router-link to="/">
+        <h1 v-if="user" class="title">
+            <router-link  to="/" >
+                {{ title }}
+            </router-link>
+        </h1>
+        <h1 v-else  class="title">
+            <router-link to="/auth" >
                 {{ title }}
             </router-link>
         </h1>
@@ -14,6 +19,7 @@
 
 <script>
 import UserDropdown from './UserDropdown.vue'
+import { mapState } from 'vuex'
 
 export default {
     name: 'Header',
@@ -24,9 +30,11 @@ export default {
         hideUserDropdown: Boolean
     },
     computed: {
+        ...mapState(['user']),
         icon() {
             return this.$store.state.isMenuVisible ?  "fa-angle-left" : "fa-angle-down"
         }
+        
     },
     methods: {
         toggleMenu() {
